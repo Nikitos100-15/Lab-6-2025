@@ -10,7 +10,7 @@ public class Main {
         // создаем таск
         Task task = new Task(100); // 100 заданий
         // создаем семафор с 1 разрешением
-        java.util.concurrent.Semaphore semaphore = new Semaphore(1);
+        Semaphore semaphore = new Semaphore(1);
         // создаем потоки
         Generator generator = new Generator(task, semaphore);
         Integrator integrator = new Integrator(task, semaphore);
@@ -67,7 +67,7 @@ public class Main {
         for (int i = 0; i < task.getTasksCount(); i++) {
             // логарифм со случайным основанием от 1 до 10
             double log = 1 + Math.random() * 9;
-            task.setFunction(new functions.basic.Log(log));
+            task.setFunction(new Log(log));
             // левая граница: 0 - 100
             task.setLeftX(Math.random() * 100);
             // правая граница: 100 - 200
