@@ -13,10 +13,11 @@ public class SimpleIntegrator implements Runnable {
             // synchronized
             synchronized (task) {
                 try {
-                    if (task.getFunction() == null) {
-                        Thread.sleep(30);
-                        continue;
+                    // ждем пока генератор создаст задание
+                    while (task.getFunction() == null) {
+                        task.wait();
                     }
+
                     // берем текущие данные
                     double leftX = task.getLeftX();
                     double rightX = task.getRightX();
@@ -24,8 +25,13 @@ public class SimpleIntegrator implements Runnable {
 
                     // вычисляем интеграл
                     double integral = Functions.Integral(task.getFunction(), leftX, rightX, step);
+
                     // выводим результат
-                    System.out.println("Integrator: Result " + leftX + " " + rightX + " " + step + " " + integral);
+                    System.out.println("Result " + leftX + " " + rightX + " " + step + " " + integral);
+
+                    // очищаем и будим генератор
+                    task.setFunction(null);
+                    task.notifyAll();
 
                 } catch (Exception e) {
                     System.out.println("Integrator error: " + e.getMessage());
@@ -33,7 +39,7 @@ public class SimpleIntegrator implements Runnable {
             }
 
             try {
-                Thread.sleep(30);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 break;
             }

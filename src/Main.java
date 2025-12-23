@@ -7,50 +7,84 @@ import java.util.concurrent.Semaphore;
 
 public class Main {
     public static void complicatedThreads() {
-        // создаем таск
-        Task task = new Task(100); // 100 заданий
-        // создаем семафор с 1 разрешением
-        Semaphore semaphore = new Semaphore(1);
-        // создаем потоки
+        complicatedThreadsWithInterrupt(); // с прерыванием через 50мс
+    }
+    //срерыванием через 50мс
+    public static void complicatedThreadsWithInterrupt() {
+        Task task = new Task(100);
+        java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(1);
+
         Generator generator = new Generator(task, semaphore);
         Integrator integrator = new Integrator(task, semaphore);
+
+        // тест приоритетов
         //generator.setPriority(Thread.MIN_PRIORITY);
         //integrator.setPriority(Thread.MAX_PRIORITY);
+
         generator.start();
         integrator.start();
+
         try {
-            Thread.sleep(50); // ждем 50 мс по заданию
+            Thread.sleep(50);
+
+            // прерываем
             generator.interrupt();
             integrator.interrupt();
 
             generator.join();
             integrator.join();
+
         } catch (InterruptedException e) {
             System.out.println("Основной поток прерван");
         }
-        System.out.println("Оба потока завершились");
+
+        System.out.println("Потоки прерваны через 50мс");
+    }
+
+    // все 100 задач
+    public static void complicatedThreadsComplete() {
+        Task task = new Task(100);
+        java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(1);
+
+        Generator generator = new Generator(task, semaphore);
+        Integrator integrator = new Integrator(task, semaphore);
+
+        generator.start();
+        integrator.start();
+
+        try {
+            // ждем завершения
+            generator.join();
+            integrator.join();
+
+        } catch (InterruptedException e) {
+            System.out.println("Основной поток прерван");
+        }
+
+        System.out.println("Все 100 задач сгенерированы и проинтегрированы");
     }
 
     // потоки
     public static void simpleThreads() {
         Task task = new Task(100);
+
         // создаем потоки
         Thread generatorThread = new Thread(new SimpleGenerator(task));
         Thread integratorThread = new Thread(new SimpleIntegrator(task));
-        // generatorThread.setPriority(Thread.MAX_PRIORITY);
-        // integratorThread.setPriority(Thread.MIN_PRIORITY);
-
-        // запускаем потоки
-        generatorThread.start();
         integratorThread.start();
-        // ждем завершения
+        try {
+            Thread.sleep(10);
+        } catch (InterruptedException e) {}
+        // затем запускаем генератор
+        generatorThread.start();
+
         try {
             generatorThread.join();
             integratorThread.join();
         } catch (InterruptedException e) {
             System.out.println("Потоки прерваны");
         }
-        System.out.println("Оба потока завершили работу");
+        System.out.println("simpleThreads: оба потока завершили работу");
     }
     // метод для вывода всех точек через геттеры
     public static void printAllPoints(TabulatedFunction func) {
@@ -570,9 +604,14 @@ public class Main {
         if (!f) {
             System.out.println("для точности 7 знаков нужен шаг < 0.00001");
         }
+        System.out.println("nonThread");
         nonThread();
+        System.out.println("simpleThreads (синхронизация");
         simpleThreads();
-        complicatedThreads();
+        System.out.println("complicatedThreads с прерыванием через 50мс");
+        complicatedThreadsWithInterrupt();
+        System.out.println("complicatedThreads  все 100 задач без прерывания");
+        complicatedThreadsComplete();
     }
 
 

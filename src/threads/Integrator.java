@@ -1,8 +1,8 @@
 package threads;
+
 import functions.Functions;
 import java.util.concurrent.Semaphore;
 
-// Integrator - поток для вычисления интегралов
 public class Integrator extends Thread {
     private final Task task;
     private final Semaphore semaphore; //семафор для синхронизации доступа
@@ -12,45 +12,46 @@ public class Integrator extends Thread {
     }
     // основной метод потока
     public void run() {
+        int task_count = 0;//  счетчик обработанных задач
+
         try {
             // работает пока поток не прервали
-            while (!isInterrupted() && task.getTasksCount() > 0) {
+            while (task_count < 100 && !isInterrupted()) {
                 try {
                     // захватываем семафор
                     semaphore.acquire();
-                } catch (InterruptedException e) {
-                    System.out.println("Integrator прерван при ожидании семафора");
-                    break;
-                }
-                try {
-                    // чтение параметров задачи, сгенерированных Generator
-                    double leftX = task.getLeftX();
-                    double rightX = task.getRightX();
-                    double step = task.getStep();
-                    // вычисление интеграла функции на заданном интервале
-                    double integral = Functions.Integral(task.getFunction(), leftX, rightX, step);
-                    // вывод результата вычислений
-                    System.out.println("Result: " + leftX + " " + rightX + " " + step + " " + integral);
-                    // уменьшаем счетчик оставшихся задач
-                    task.setTasksCount(task.getTasksCount() - 1);
+
+                    if (task.getFunction() != null) {
+                        // чтение параметров задачи, сгенерированных Generator
+                        double leftX = task.getLeftX();
+                        double rightX = task.getRightX();
+                        double step = task.getStep();
+                        // вычисление интеграла функции на заданном интервале
+                        double integral = Functions.Integral(task.getFunction(), leftX, rightX, step);
+                        // вывод результата вычислений
+                        System.out.println("Result " + leftX + " " + rightX + " " + step + " " + integral);
+
+                        task.setFunction(null); // очищаем
+                        task_count++;
+                    }
 
                 } finally {
-                    // всегда освобождаем семафор
                     semaphore.release();
                 }
-
-                //пауза между вычислениями
+                // пауза между вычислениями
                 try {
-                    sleep(10);
+                    sleep(1);
                 } catch (InterruptedException e) {
-                    System.out.println("Integrator прерван во время паузы");
+                    if (task_count < 100) {
+                        System.out.println("Integrator прерван после " + task_count + " задач");
+                    }
                     break;
                 }
             }
         } catch (Exception e) {
-            //  ловим любые другие исключения
             System.out.println("Integrator error: " + e.getMessage());
         }
-        System.out.println("Integrator завершил работу");
+
+        System.out.println("Integrator: " + task_count + "/100 задач");
     }
 }

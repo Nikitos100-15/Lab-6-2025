@@ -7,6 +7,7 @@ public class SimpleGenerator implements Runnable {
     public SimpleGenerator(Task task) {
         this.task = task;
     }
+
     public void run() {
         for (int i = 0; i < task.getTasksCount(); i++) {
             // synchronized
@@ -17,14 +18,23 @@ public class SimpleGenerator implements Runnable {
                 task.setLeftX(Math.random() * 100);
                 task.setRightX(100 + Math.random() * 100);
                 task.setStep(Math.random());
-                System.out.println("Generator: Source " + task.getLeftX() + " " + task.getRightX() + " " + task.getStep());
+                System.out.println("Source " + task.getLeftX() + " " + task.getRightX() + " " + task.getStep());
+
+                task.notifyAll();
+                // ждем пока интегратор обработает
+                try {
+                    task.wait();
+                } catch (InterruptedException e) {
+                    break;
+                }
             }
 
             try {
-                Thread.sleep(100);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
                 break;
             }
         }
+        System.out.println("Выполнено " + task.getTasksCount() + " заданий.");
     }
 }
