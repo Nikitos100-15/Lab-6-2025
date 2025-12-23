@@ -9,12 +9,13 @@ public class Main {
     public static void complicatedThreads() {
         complicatedThreadsWithInterrupt(); // с прерыванием через 50мс
     }
-    //срерыванием через 50мс
+    // прерыванием через 50мс
     public static void complicatedThreadsWithInterrupt() {
         Task task = new Task(100);
         java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(1);
 
         Generator generator = new Generator(task, semaphore);
+
         Integrator integrator = new Integrator(task, semaphore);
 
         // тест приоритетов
@@ -22,6 +23,10 @@ public class Main {
         //integrator.setPriority(Thread.MAX_PRIORITY);
 
         generator.start();
+        // Ждем немного, чтобы генератор успел создать первую задачу
+        try {
+            Thread.sleep(20); // увеличил с 10 до 20
+        } catch (InterruptedException e) {}
         integrator.start();
 
         try {
@@ -43,11 +48,13 @@ public class Main {
 
     // все 100 задач
     public static void complicatedThreadsComplete() {
+
         Task task = new Task(100);
         java.util.concurrent.Semaphore semaphore = new java.util.concurrent.Semaphore(1);
 
         Generator generator = new Generator(task, semaphore);
         Integrator integrator = new Integrator(task, semaphore);
+
 
         generator.start();
         integrator.start();

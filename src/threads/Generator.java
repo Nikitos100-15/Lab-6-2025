@@ -22,6 +22,11 @@ public class Generator extends Thread {
                 try {
                     // захватываем семафор
                     semaphore.acquire();
+                    if (task.getFunction() != null) {
+                        semaphore.release();
+                        Thread.sleep(1);
+                        continue;
+                    }
 
                     // генерация случайных параметров для задачи:
                     double a = random.nextDouble() * 9 + 1;
