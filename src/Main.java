@@ -64,26 +64,32 @@ public class Main {
         System.out.println("Все 100 задач сгенерированы и проинтегрированы");
     }
 
-    // потоки
     public static void simpleThreads() {
         Task task = new Task(100);
 
         // создаем потоки
         Thread generatorThread = new Thread(new SimpleGenerator(task));
         Thread integratorThread = new Thread(new SimpleIntegrator(task));
-        integratorThread.start();
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {}
-        // затем запускаем генератор
+
+        // Запускаем генератор ПЕРВЫМ
         generatorThread.start();
 
+        // Ждем немного, чтобы генератор успел создать первую задачу
+        try {
+            Thread.sleep(20); // увеличил с 10 до 20
+        } catch (InterruptedException e) {}
+
+        // Затем запускаем интегратор
+        integratorThread.start();
+
+        // Ждем завершения
         try {
             generatorThread.join();
             integratorThread.join();
         } catch (InterruptedException e) {
             System.out.println("Потоки прерваны");
         }
+
         System.out.println("simpleThreads: оба потока завершили работу");
     }
     // метод для вывода всех точек через геттеры
@@ -606,7 +612,7 @@ public class Main {
         }
         System.out.println("nonThread");
         nonThread();
-        System.out.println("simpleThreads (синхронизация");
+        System.out.println("simpleThreads");
         simpleThreads();
         System.out.println("complicatedThreads с прерыванием через 50мс");
         complicatedThreadsWithInterrupt();

@@ -25,11 +25,9 @@ public class SimpleIntegrator implements Runnable {
 
                     // вычисляем интеграл
                     double integral = Functions.Integral(task.getFunction(), leftX, rightX, step);
-
-                    // выводим результат
                     System.out.println("Result " + leftX + " " + rightX + " " + step + " " + integral);
 
-                    // очищаем и будим генератор
+                    // очищаем
                     task.setFunction(null);
                     task.notifyAll();
 
